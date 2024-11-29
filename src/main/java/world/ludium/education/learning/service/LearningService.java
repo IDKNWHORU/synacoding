@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import world.ludium.education.learning.dto.LearnMonitorDTO;
+import world.ludium.education.learning.dto.LearningSummaryDto;
 import world.ludium.education.learning.model.Learning;
 import world.ludium.education.learning.repository.LearningRepository;
 import world.ludium.education.profile.dto.LearningDTO;
@@ -19,11 +20,11 @@ public class LearningService {
     this.learningRepository = learningRepository;
   }
 
-  public List<Learning> getAllLearning() {
+  public List<LearningSummaryDto> getAllLearning() {
     return learningRepository.findAllByOrderByCreateAtDesc();
   }
 
-  public List<Learning> getTop5Learning() {
+  public List<LearningSummaryDto> getTop5Learning() {
     return learningRepository.findTop5ByOrderByCreateAtDesc();
   }
 

@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import world.ludium.education.announcement.dto.DetailedAnnouncementCoWorkerDTO;
+import world.ludium.education.announcement.dto.DetailedAnnouncementSummaryDto;
 import world.ludium.education.announcement.model.DetailedAnnouncement;
 import world.ludium.education.announcement.model.DetailedAnnouncementCoWorker;
 import world.ludium.education.announcement.model.DetailedAnnouncementContent;
@@ -41,7 +42,7 @@ public class DetailedAnnouncementService {
     this.detailedAnnouncementCoWorkerRepository = detailedAnnouncementCoWorkerRepository;
   }
 
-  public List<DetailedAnnouncement> getAllDetailedAnnouncement() {
+  public List<DetailedAnnouncementSummaryDto> getAllDetailedAnnouncement() {
     return detailedAnnouncementRepository.findAllByOrderByIsPinnedDescPinOrderDescCreateAtAsc();
   }
 

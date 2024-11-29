@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import world.ludium.education.announcement.dto.AnnouncementSummaryDto;
 import world.ludium.education.announcement.model.Announcement;
 import world.ludium.education.announcement.repository.AnnouncementRepository;
 
@@ -17,11 +18,11 @@ public class AnnouncementService {
     this.announcementRepository = announcementRepository;
   }
 
-  public List<Announcement> getAllAnnouncement() {
+  public List<AnnouncementSummaryDto> getAllAnnouncement() {
     return announcementRepository.findAllByOrderByIsPinnedDescPinOrderDescCreateAtDesc();
   }
 
-  public List<Announcement> getTop5Announcement() {
+  public List<AnnouncementSummaryDto> getTop5Announcement() {
     return announcementRepository.findTop5ByOrderByCreateAtDesc();
   }
 

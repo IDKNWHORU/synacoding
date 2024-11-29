@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import world.ludium.education.learning.dto.LearnMonitorDTO;
+import world.ludium.education.learning.dto.LearningSummaryDto;
 import world.ludium.education.learning.model.Learning;
 import world.ludium.education.profile.dto.LearningDTO;
 
@@ -68,9 +69,11 @@ public interface LearningRepository extends JpaRepository<Learning, UUID> {
       """)
   List<LearningDTO> getTop4LearningDTOByUsrId(@Param("usrId") UUID usrId, Pageable pageable);
 
-  List<Learning> findAllByOrderByCreateAtDesc();
+  @Query("SELECT NEW world.ludium.education.learning.dto.LearningSummaryDto(l.postingId, l.title, l.createAt) FROM Learning l ORDER BY l.createAt")
+  List<LearningSummaryDto> findAllByOrderByCreateAtDesc();
 
-  List<Learning> findTop5ByOrderByCreateAtDesc();
+  @Query("SELECT NEW world.ludium.education.learning.dto.LearningSummaryDto(l.postingId, l.title, l.createAt) FROM Learning l ORDER BY l.createAt LIMIT 5")
+  List<LearningSummaryDto> findTop5ByOrderByCreateAtDesc();
 
   @Query(nativeQuery = true, value = """
       SELECT c.title curriculum, m.title mission, tlu.nick nick, ms.usr_id usrId

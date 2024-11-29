@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import world.ludium.education.announcement.dto.AnnouncementSummaryDto;
 import world.ludium.education.announcement.dto.ApplicationDTO;
 import world.ludium.education.announcement.dto.DetailedAnnouncementWorkerDTO;
 import world.ludium.education.announcement.model.Announcement;
@@ -60,7 +61,7 @@ public class AnnouncementController {
   }
 
   @GetMapping("")
-  public ResponseEntity<List<Announcement>> getAllAnnouncement() {
+  public ResponseEntity<List<AnnouncementSummaryDto>> getAllAnnouncement() {
     return ResponseEntity.ok(announcementService.getAllAnnouncement());
   }
 

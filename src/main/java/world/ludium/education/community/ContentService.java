@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import world.ludium.education.community.dto.ContentSummaryDto;
 import world.ludium.education.community.model.Content;
 import world.ludium.education.community.model.ContentComment;
 import world.ludium.education.community.model.ContentRecommend;
@@ -28,7 +29,7 @@ public class ContentService {
     this.contentRecommendRepository = contentRecommendRepository;
   }
 
-  public List<Content> getAllContent() {
+  public List<ContentSummaryDto> getAllContent() {
     return contentRepository.findAllByVisibleOrderByIsPinnedDescPinOrderDescCreateAtDesc(true);
   }
 
@@ -42,12 +43,12 @@ public class ContentService {
   }
 
 
-  public Content getLatestAnnouncement() {
+  public ContentSummaryDto getLatestAnnouncement() {
     return contentRepository.findTop1ByTypeAndVisibleOrderByCreateAtDesc(
         ContentType.ANNOUNCEMENT.toString(), true).orElseThrow();
   }
 
-  public Content getLatestBanner() {
+  public ContentSummaryDto getLatestBanner() {
     return contentRepository.findTop1ByTypeAndVisibleOrderByCreateAtDesc(
         ContentType.BANNER.toString(), true).orElseThrow();
   }

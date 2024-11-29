@@ -7,12 +7,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import world.ludium.education.announcement.dto.DetailedAnnouncementSummaryDto;
 import world.ludium.education.announcement.model.DetailedAnnouncement;
 import world.ludium.education.profile.dto.MyDetailAnnouncementDTO;
 
 public interface DetailedAnnouncementRepository extends JpaRepository<DetailedAnnouncement, UUID> {
 
-  List<DetailedAnnouncement> findAllByOrderByIsPinnedDescPinOrderDescCreateAtAsc();
+
+  @Query("SELECT NEW world.ludium.education.announcement.dto.DetailedAnnouncementSummaryDto(da.detailId, da.postingId, da.title, da.status, da.createAt, da.isPinned, da.pinOrder) FROM DetailedAnnouncement da ORDER BY da.isPinned DESC, da.pinOrder DESC, da.createAt ASC")
+  List<DetailedAnnouncementSummaryDto> findAllByOrderByIsPinnedDescPinOrderDescCreateAtAsc();
 
   List<DetailedAnnouncement> findAllByPostingIdOrderByCreateAt(UUID postingId);
 
