@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title th:text="'과제 제출: ' + ${assignment.title}"></title>
+    <style>
+        .submission-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .assignment-info {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="submission-container">
+            <h1>과제 제출</h1>
+
+            <!-- 과제 정보 -->
+            <div class="assignment-info">
+                <h3 th:text="${assignment.title}">과제 제목</h3>
+                <p th:utext="${formattedContent}">과제 내용</p>
+                <div th:if="${assignment.deadline}" class="text-danger">
+                    <strong>마감일: </strong>
+                    <span th:text="${#temporals.format(assignment.deadline, 'yyyy-MM-dd HH:mm')}"></span>
+                </div>
+            </div>
+
+            <!-- 과제 제출 폼 -->
+            <form th:action="@{/assignments/{id}/submit(id=${assignment.id})}" th:object="${submissionRequest}"
+                method="post">
+                <div class="form-group">
+                    <label for="content">
+                        <h4>답변 작성</h4>
+                    </label>
+                    <textarea id="content" th:field="*{content}" class="form-control"
+                        placeholder="여기에 답변을 작성해주세요."></textarea>
+                </div>
+                <button type="submit" class="btn">제출하기</button>
+                <a th:href="@{/my-courses/{id}(id=${assignment.lecture.chapter.course.id})}"
+                    class="btn btn-secondary">목록으로</a>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

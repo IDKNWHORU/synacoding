@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin-layout :: layout(~{::content}, ~{::title}, ~{})}">
+
+<head>
+    <title>강의 관리</title>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <h1>강의 관리</h1>
+        <a th:href="@{/admin/courses/new}" class="btn btn-primary mb-3">신규 강의 등록</a>
+
+        <!-- 성공 메시지 표시 -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>강의 제목</th>
+                    <th>상태</th>
+                    <th>가격</th>
+                    <th>생성일</th>
+                    <th style="width: 380px">관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="course : ${courses}">
+                    <td th:text="${course.id}">1</td>
+                    <td th:text="${course.title}">강의 제목</td>
+                    <td>
+                        <!-- 상태별로 뱃지 스타일 적용 -->
+                        <span th:text="${course.status.name()}" class="badge"
+                            th:classappend="${course.status.name() == 'PUBLISHED' ? 'bg-success' : 'bg-secondary'}">
+                        </span>
+                    </td>
+                    <td th:text="${#numbers.formatCurrency(course.price)}">10,000원</td>
+                    <td th:text="${#temporals.format(course.createdAt, 'yyyy-MM-dd')}">2025-01-01</td>
+                    <td>
+                        <a th:href="@{/admin/courses/{id}/curriculum(id=${course.id})}" class="btn btn-sm btn-info">커리큘럼
+                            관리</a>
+                        <a th:href="@{/admin/courses/{id}/edit(id=${course.id})}"
+                            class="btn btn-sm btn-secondary">수정</a>
+                        <div th:switch="${course.status.name()}" style="display:inline;">
+                            <!-- DRAFT 상태일 때: '게시' 버튼 -->
+                            <form th:case="'DRAFT'" th:action="@{/admin/courses/{id}/publish(id=${course.id})}"
+                                method="post" style="display:inline;" onsubmit="return confirm('이 강의를 게시하시겠습니까?');">
+                                <button type="submit" class="btn btn-sm btn-success">게시</button>
+                            </form>
+                            <!-- PUBLISHED 상태일 때: '게시 취소', '보관' 버튼 -->
+                            <div th:case="'PUBLISHED'">
+                                <form th:action="@{/admin/courses/{id}/unpublish(id=${course.id})}" method="post"
+                                    style="display:inline;" onsubmit="return confirm('강의 게시를 취소하고 초안 상태로 되돌리시겠습니까?');">
+                                    <button type="submit" class="btn btn-sm btn-warning">게시 취소</button>
+                                </form>
+                                <form th:action="@{/admin/courses/{id}/archive(id=${course.id})}" method="post"
+                                    style="display:inline;" onsubmit="return confirm('정말로 이 강의를 보관 처리하시겠습니까?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">보관</button>
+                                </form>
+                            </div>
+                            <!-- ARCHIVED 상태일 때: '재게시' 버튼 -->
+                            <form th:case="'ARCHIVED'" th:action="@{/admin/courses/{id}/republish(id=${course.id})}"
+                                method="post" style="display:inline;"
+                                onsubmit="return confirm('이 강의를 다시 판매 목록에 게시하시겠습니까?');">
+                                <button type="submit" class="btn btn-sm btn-primary">재게시</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</body>
+
+</html>

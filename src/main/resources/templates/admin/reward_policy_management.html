@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin-layout :: layout(~{::content}, ~{::title}, ~{})}">
+
+<head>
+    <title>보상 정책 관리</title>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <h1>보상 정책 관리</h1>
+        <p>사이트의 포인트 및 쿠폰 관련 정책을 설정합니다. 이 설정은 사이트 전체에 영향을 미칩니다.</p>
+
+        <!-- 성공 메시지 표시 -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+        <form th:action="@{/admin/reward-policies/update}" th:object="${policyForm}" method="post">
+            <!-- th:each를 사용하여 컨트롤러에서 받은 정책 목록을 순회합니다. -->
+            <div th:each="policy, iterStat : *{policies}" class="mb-4">
+                <!-- 정책의 설명을 Label로 표시합니다. -->
+                <label th:for="|policies${iterStat.index}.value|" class="form-label fw-bold"
+                    th:text="${policies[iterStat.index].description}">정책 설명</label>
+
+                <!--
+            어떤 정책을 수정하는지 서버에 알려주기 위해 'key' 값을 hidden input으로 전송합니다.
+            th:field 문법은 name, id, value 속성을 자동으로 생성해줍니다.
+            ex) name="policies[0].key", id="policies0.key"
+            -->
+                <input type="hidden" th:field="*{policies[__${iterStat.index}__].key}">
+
+                <!-- 사용자가 실제 값을 수정할 수 있는 input 필드입니다. -->
+                <input type="text" th:id="|policies${iterStat.index}.value|"
+                    th:field="*{policies[__${iterStat.index}__].value}" class="form-control">
+
+                <!-- 유효성 검증 에러 메시지를 표시할 수 있습니다 (필요시 추가). -->
+                <div th:if="${#fields.hasErrors('policies[__${iterStat.index}__].value')}"
+                    th:errors="*{policies[__${iterStat.index}__].value}" class="invalid-feedback d-block"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">정책 저장</button>
+        </form>
+    </section>
+</body>
+
+</html>

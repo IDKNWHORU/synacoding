@@ -4,12 +4,14 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.platform.coding.domain.user.User;
 import com.platform.coding.domain.user.UserRepository;
+import com.platform.coding.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,13 +23,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-@Log4j2
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final CookieUtil cookieUtil;
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
 
@@ -45,9 +47,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // 4. Spring Security 컨텍스트에 인증 정보를 등록합니다.
                 userRepository.findById(userId).ifPresent(this::saveAuthentication);
             } catch (JWTVerificationException e) {
-                // 토큰이 유효하지 않을 경우의 처리 (예: 로깅)
-                log.error("e", e);
-                // 여기서는 아무것도 하지 않고 다음 필터로 넘깁니다. (인증 실패)
+                // 토큰이 유효하지 않으면(만료, 위조 등) SecurityContext를 비운다.
+                // 그러면 해당 요청은 '인증되지 않은' 요청으로 처리되며,
+                // 뒤이은 Spring Security 필터 체인에서 이를 감지하고
+                // 우리가 등록한 CustomAuthenticationEntryPoint를 호출하게 된다.
+                log.warn("JWT 토큰 검증 실패: {}, URI: {}", e.getMessage(), request.getRequestURI());
+                SecurityContextHolder.clearContext();
             }
         }
 
@@ -56,11 +61,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
+        // 1. 헤더에서 토큰 찾기 (API 호출용)
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(BEARER_PREFIX.length());
         }
-        return null;
+
+        // 2. 헤더에 없으면 쿠키에서 토큰 찾기 (웹 페이지 접근용)
+        return cookieUtil.getCookie(request, CookieUtil.ACCESS_TOKEN_COOKIE_NAME)
+                .map(Cookie::getValue)
+                .orElse(null);
     }
 
     private void saveAuthentication(User user) {

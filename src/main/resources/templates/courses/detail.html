@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <!-- 페이지 제목을 동적으로 설정합니다 -->
+    <title th:text="${course.title} + ' | 시나코딩'"></title>
+    <!-- 페이지 전용 스타일 -->
+    <style>
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+        }
+
+        .course-detail-header {
+            background-color: #343a40;
+            color: white;
+            padding: 3rem 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+
+        .course-detail-header h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .course-detail-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .course-meta {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .course-main {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .course-curriculum,
+        .course-reviews {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .course-sidebar {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .course-purchase-card {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .course-price-large {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #007bff;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+            text-decoration: none;
+            padding: .5rem 1rem;
+            border-radius: .25rem;
+            display: inline-block;
+        }
+
+        .btn-success {
+            color: #fff;
+            background-color: #198754;
+            border-color: #198754;
+        }
+
+        .w-100 {
+            width: 100%;
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }
+
+        .chapter-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 0.5rem;
+        }
+
+        .lecture-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .lecture-item {
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .lecture-item a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .lecture-item a:hover {
+            color: #007bff;
+        }
+
+        .lecture-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: .35em .65em;
+            font-size: .75em;
+            font-weight: 700;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: .25rem;
+        }
+
+        .bg-info {
+            background-color: #17a2b8 !important;
+        }
+
+        .ms-2 {
+            margin-left: .5rem;
+        }
+
+        .course-reviews {
+            margin-top: 2rem;
+        }
+
+        .review-item {
+            border-bottom: 1px solid #f1f1f1;
+            padding: 1rem 0;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-meta {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .review-rating .star {
+            color: #f5b301;
+        }
+
+        .alert {
+            position: relative;
+            padding: 1rem 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: .25rem;
+        }
+
+        .alert-success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+
+        .alert-danger {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="container">
+            <!-- 강의 헤더 -->
+            <div class="course-detail-header" th:object="${course}">
+                <h1 th:text="*{title}">강의 제목</h1>
+                <p th:text="*{description}">강의에 대한 간략한 설명입니다.</p>
+                <div class="course-meta">
+                    <span>강사: </span><span th:text="*{instructorName}">강사 이름</span>
+                </div>
+            </div>
+
+            <!-- 성공/에러 메시지 표시 -->
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+            <!-- 메인 콘텐츠 (커리큘럼 + 구매 사이드바) -->
+            <div class="course-main">
+                <!-- 왼쪽: 커리큘럼 -->
+                <div class="course-curriculum" th:object="${course}">
+                    <h2>커리큘럼</h2>
+                    <div th:each="chapter : *{curriculum}">
+                        <h3 class="chapter-title" th:text="${chapter.title}">챕터 제목</h3>
+                        <ul class="lecture-list">
+                            <li th:each="lecture : ${chapter.lectures}" class="lecture-item">
+                                <a th:href="@{/lectures/{id}/watch(id=${lecture.lectureId})}">
+                                    <span th:text="${lecture.title}">렉처 제목</span>
+                                    <span th:if="${lecture.isSample}" class="badge bg-info ms-2">맛보기</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div th:if="${#lists.isEmpty(course.curriculum)}" class="text-center p-5">
+                        <p>등록된 커리큘럼이 없습니다.</p>
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 구매 및 후기 작성 사이드바 -->
+                <aside class="course-sidebar">
+                    <div class="course-purchase-card" th:object="${course}">
+                        <div class="course-price-large" th:text="${#numbers.formatCurrency(price)}">₩50,000</div>
+                        <a th:href="@{/orders/checkout/{courseId}(courseId=*{courseId})}"
+                            class="btn btn-primary w-100">수강 신청하기</a>
+
+                        <!-- 리뷰 작성 버튼 (조건부 표시) -->
+                        <div th:if="${canWriteReview}" class="mt-3">
+                            <a th:href="@{/courses/{id}/reviews/new(id=*{courseId})}" class="btn btn-success w-100">수강
+                                후기 작성하기</a>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- 수강 후기 목록 섹션 -->
+            <div class="course-reviews">
+                <h2>수강 후기</h2>
+                <div th:if="${#lists.isEmpty(reviews)}" class="text-center p-4">
+                    <p>아직 작성된 수강 후기가 없습니다. 첫 후기를 남겨주세요!</p>
+                </div>
+                <div th:unless="${#lists.isEmpty(reviews)}">
+                    <div th:each="review : ${reviews}" class="review-item">
+                        <div class="review-meta">
+                            <span th:text="${review.studentName}">학생 이름</span>
+                            <span class="review-rating ms-2">
+                                <span th:each="i : ${#numbers.sequence(1, 5)}" class="star"
+                                    th:text="${i <= review.rating ? '★' : '☆'}"></span>
+                            </span>
+                        </div>
+                        <p class="review-content" th:text="${review.content}">리뷰 내용입니다.</p>
+                        <small class="text-muted"
+                            th:text="${#temporals.format(review.createdAt, 'yyyy-MM-dd')}"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

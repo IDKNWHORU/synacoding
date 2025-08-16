@@ -6,6 +6,9 @@ import com.platform.coding.service.user.dto.UserLoginRequest;
 import com.platform.coding.service.user.dto.UserLoginResponse;
 import com.platform.coding.service.user.dto.UserSignUpRequest;
 import com.platform.coding.service.user.dto.UserSignupResponse;
+import com.platform.coding.util.CookieUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final CookieUtil cookieUtil;
 
     // POST /api/users/signup 요청을 처리함
     @PostMapping("/signup")
@@ -31,11 +35,17 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request) {
-        UserLoginResponse response = userService.login(request);
+    public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request, HttpServletResponse response) {
+        userService.login(request, response);
 
-        // 성공 시 200 OK와 함계 토큰 반환
-        return ResponseEntity.ok(response);
+        // 응답 본문 없이 200 OK 상태만 반환
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal User user, HttpServletResponse response) {
+        userService.logout(user, response);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")
@@ -44,5 +54,14 @@ public class UserController {
         // SecurityContext에 저장된 인증 객체(Principal)를 직접 주입받을 수 있습니다.
         UserSignupResponse response = UserSignupResponse.fromEntity(user);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 액세스 토큰 재발급을 위한 API
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<Void> refresh(HttpServletRequest request, HttpServletResponse response) {
+        userService.refreshAccessToken(request, response);
+        return ResponseEntity.ok().build();
     }
 }

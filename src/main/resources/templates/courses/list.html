@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title>강의 목록 | 시나코딩</title>
+    <!-- 페이지 전용 스타일 -->
+    <style>
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .course-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+            transition: box-shadow 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-card:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .course-thumbnail {
+            width: 100%;
+            height: 180px;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
+
+        .course-content {
+            padding: 1rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .course-instructor,
+        .course-price {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .course-price {
+            font-weight: bold;
+            color: #0056b3;
+            margin-top: 0.5rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            list-style: none;
+            padding: 0;
+        }
+
+        .pagination li {
+            margin: 0 5px;
+        }
+
+        .pagination li a {
+            color: #007bff;
+            padding: 8px 12px;
+            text-decoration: none;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .pagination li.active a {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pagination li.disabled a {
+            color: #6c757d;
+            pointer-events: none;
+            border-color: #dee2e6;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="container">
+            <h1>전체 강의 목록</h1>
+            <p>새로운 성장의 기회를 찾아보세요!</p>
+
+            <!-- 강의 목록 그리드 -->
+            <div th:if="${!coursesPage.isEmpty()}" class="course-grid">
+                <div th:each="course : ${coursesPage.content}" class="course-card">
+                    <a th:href="@{'/courses/' + ${course.courseId}}" style="text-decoration: none; color: inherit;">
+                        <div class="course-thumbnail">
+                            <span>썸네일 이미지</span>
+                        </div>
+                        <div class="course-content">
+                            <h5 class="course-title" th:text="${course.title}">강의 제목</h5>
+                            <p class="course-instructor" th:text="'강사: ' + ${course.instructorName}">강사명</p>
+                            <p class="course-price" th:text="${#numbers.formatCurrency(course.price)}">가격</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div th:if="${coursesPage.isEmpty()}" class="text-center my-5">
+                <p>게시된 강의가 없습니다.</p>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <nav th:if="${coursesPage.totalPages > 1}" aria-label="Page navigation">
+                <ul class="pagination">
+                    <!-- 이전 페이지 링크 -->
+                    <li class="page-item" th:classappend="${coursesPage.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/courses(page=${coursesPage.number - 1})}">
+                            <span>&laquo;</span>
+                        </a>
+                    </li>
+
+                    <!-- 페이지 번호 링크 -->
+                    <li class="page-item" th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
+                        th:classappend="${pageNumber == coursesPage.number + 1} ? 'active'">
+                        <a class="page-link" th:href="@{/courses(page=${pageNumber - 1})}" th:text="${pageNumber}">1</a>
+                    </li>
+
+                    <!-- 다음 페이지 링크 -->
+                    <li class="page-item" th:classappend="${coursesPage.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/courses(page=${coursesPage.number + 1})}">
+                            <span>&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </section>
+</body>
+
+</html>

@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-public class CourseControllerTest extends IntegrationTestSupport {
+public class CourseApiControllerTest extends IntegrationTestSupport {
     @Autowired
     private MockMvc mockMvc;
 
@@ -95,7 +95,7 @@ public class CourseControllerTest extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.curriculum").isArray())
                 .andExpect(jsonPath("$.curriculum[0].title").value("1챕터"))
                 .andExpect(jsonPath("$.curriculum[0].lectures[0].title").value("1-1강"))
-                .andExpect(jsonPath("$.curriculum[0].lectures[0].isSample").value(true));
+                .andExpect(jsonPath("$.curriculum[0].lectures[0].sample").value(true));
     }
 
     @Test

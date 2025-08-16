@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<body>
+    <header th:fragment="header" class="admin-header">
+        <div class="header-brand">
+            <a th:href="@{/admin/dashboard}">시나코딩 관리자</a>
+        </div>
+        <div class="header-user-info">
+            <!-- 현재 로그인한 사용자의 이름을 보여줍니다. -->
+            <span sec:authentication="principal.userName"></span>님 환영합니다.
+            <a href="javascript:logout();" class="logout-link">로그아웃</a>
+        </div>
+    </header>
+</body>
+
+</html>

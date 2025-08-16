@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin-layout :: layout(~{::content}, ~{::title}, ~{})}">
+
+<head>
+    <title>회원 관리</title>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <h1>회원 관리</h1>
+
+        <!-- 성공 메시지 표시 -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+        <!-- 회원 검색 폼 -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form th:action="@{/admin/users}" method="get" class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <select name="searchType" class="form-select">
+                            <option value="email" th:selected="${searchType == 'email'}">이메일</option>
+                            <option value="userName" th:selected="${searchType == 'userName'}">이름</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" name="keyword" class="form-control" placeholder="검색어 입력"
+                            th:value="${keyword}">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">검색</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>이메일</th>
+                    <th>이름</th>
+                    <th>타입</th>
+                    <th>가입일</th>
+                    <th>상태</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${userPage.content}">
+                    <td th:text="${user.userId}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td th:text="${user.userName}"></td>
+                    <td th:text="${user.userType.name()}"></td>
+                    <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td>
+                        <span th:text="${user.isActive ? '활성' : '정지'}" class="badge"
+                            th:classappend="${user.isActive ? 'bg-success' : 'bg-danger'}"></span>
+                    </td>
+                    <td>
+                        <!-- 활성 상태일 때 '정지' 버튼 표시 -->
+                        <form th:if="${user.isActive}" th:action="@{/admin/users/{id}/deactivate(id=${user.userId})}"
+                            method="post" style="display:inline;" onsubmit="return confirm('이 회원을 정지 처리하시겠습니까?');">
+                            <button type="submit" class="btn btn-sm btn-warning">정지</button>
+                        </form>
+                        <!-- 정지 상태일 때 '활성' 버튼 표시 -->
+                        <form th:unless="${user.isActive}" th:action="@{/admin/users/{id}/activate(id=${user.userId})}"
+                            method="post" style="display:inline;" onsubmit="return confirm('이 회원을 다시 활성화하시겠습니까?');">
+                            <button type="submit" class="btn btn-sm btn-success">활성</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${userPage.isEmpty()}">
+                    <td colspan="7" class="text-center">조회된 회원이 없습니다.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 페이지네이션 -->
+        <nav th:if="${userPage.totalPages > 1}" aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${userPage.first} ? 'disabled'">
+                    <a class="page-link"
+                        th:href="@{/admin/users(page=${userPage.number - 1}, searchType=${searchType}, keyword=${keyword})}">&laquo;</a>
+                </li>
+                <li class="page-item" th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
+                    th:classappend="${pageNumber == nowPage} ? 'active'">
+                    <a class="page-link"
+                        th:href="@{/admin/users(page=${pageNumber - 1}, searchType=${searchType}, keyword=${keyword})}"
+                        th:text="${pageNumber}"></a>
+                </li>
+                <li class="page-item" th:classappend="${userPage.last} ? 'disabled'">
+                    <a class="page-link"
+                        th:href="@{/admin/users(page=${userPage.number + 1}, searchType=${searchType}, keyword=${keyword})}">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+
+    </section>
+</body>
+
+</html>

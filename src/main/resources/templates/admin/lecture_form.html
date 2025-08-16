@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin-layout :: layout(~{::content}, ~{::title}, ~{})}">
+
+<head>
+    <title>렉처 정보 수정</title>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <h1>렉처 정보 수정</h1>
+
+        <form th:action="@{/admin/courses/lectures/{id}/edit(id=${lectureId})}" th:object="${lectureRequest}"
+            method="post">
+            <div class="mb-3">
+                <label for="title" class="form-label">렉처 제목</label>
+                <input type="text" id="title" th:field="*{title}" class="form-control"
+                    th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''">
+                <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="videoUrl" class="form-label">비디오 URL</label>
+                <input type="text" id="videoUrl" th:field="*{videoUrl}" class="form-control"
+                    th:classappend="${#fields.hasErrors('videoUrl')} ? 'is-invalid' : ''">
+                <div th:if="${#fields.hasErrors('videoUrl')}" th:errors="*{videoUrl}" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="order" class="form-label">순서</label>
+                <input type="number" id="order" th:field="*{order}" class="form-control"
+                    th:classappend="${#fields.hasErrors('order')} ? 'is-invalid' : ''">
+                <div th:if="${#fields.hasErrors('order')}" th:errors="*{order}" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="durationSeconds" class="form-label">강의 시간 (초)</label>
+                <input type="number" id="durationSeconds" th:field="*{durationSeconds}" class="form-control">
+            </div>
+
+            <div class="mb-3 form-check">
+                <!-- [수정] th:field="*{sample}" -> th:field="*{sample}" -->
+                <input type="checkbox" id="isSample" th:field="*{sample}" class="form-check-input">
+                <label for="isSample" class="form-check-label">맛보기 강의로 설정</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">저장</button>
+            <a th:href="@{/admin/courses/{id}/curriculum(id=${courseId})}" class="btn btn-secondary">취소</a>
+        </form>
+    </section>
+</body>
+
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko" th:fragment="layout(content, pageTitle, scripts)">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} ?: '관리자 페이지'"></title>
+    <!-- 여기에 관리자용 CSS/JS 라이브러리를 추가할 수 있습니다. -->
+    <link rel="stylesheet" th:href="@{/css/admin-style.css}">
+</head>
+
+<body>
+    <div class="admin-wrapper">
+        <!-- 관리자용 헤더 삽입 -->
+        <header th:replace="~{fragments/admin-header :: header}"></header>
+
+        <div class="admin-container">
+            <!-- 관리자용 사이드바(메뉴) 삽입 -->
+            <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+
+            <!-- 각 페이지의 실제 콘텐츠가 삽입될 부분 -->
+            <main class="admin-content">
+                <th:block th:replace="${content}"></th:block>
+            </main>
+        </div>
+
+        <!-- 관리자용 푸터 삽입 -->
+        <footer th:replace="~{fragments/admin-footer :: footer}"></footer>
+    </div>
+    <script th:src="@{/js/common.js}"></script>
+    <!--/* 각 페이지의 고유한 스크립트를 삽입할 블록 */-->
+    <th:block th:replace="${scripts} ?: ~{}"></th:block>
+</body>
+
+</html>

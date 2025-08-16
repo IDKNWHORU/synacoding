@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title th:text="'후기 작성: ' + ${course.title}"></title>
+    <style>
+        .review-form-container {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 2rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .star-rating input[type="radio"]:checked~label,
+        .star-rating label:hover,
+        .star-rating label:hover~label {
+            color: #f5b301;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: .5rem;
+        }
+
+        textarea.form-control {
+            width: 100%;
+            min-height: 150px;
+            padding: .5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .text-danger {
+            color: #dc3545;
+            font-size: 0.875em;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="review-form-container">
+            <h1>수강 후기 작성</h1>
+            <h4 th:text="${course.title}">강의 제목</h4>
+            <hr>
+
+            <form th:action="@{/courses/{courseId}/reviews(courseId=${course.id})}" th:object="${reviewRequest}"
+                method="post">
+                <!-- 별점 -->
+                <div class="form-group">
+                    <label>평점</label>
+                    <div class="star-rating">
+                        <input type="radio" id="5-stars" th:field="*{rating}" value="5" /><label for="5-stars"
+                            class="star">&#9733;</label>
+                        <input type="radio" id="4-stars" th:field="*{rating}" value="4" /><label for="4-stars"
+                            class="star">&#9733;</label>
+                        <input type="radio" id="3-stars" th:field="*{rating}" value="3" /><label for="3-stars"
+                            class="star">&#9733;</label>
+                        <input type="radio" id="2-stars" th:field="*{rating}" value="2" /><label for="2-stars"
+                            class="star">&#9733;</label>
+                        <input type="radio" id="1-star" th:field="*{rating}" value="1" /><label for="1-star"
+                            class="star">&#9733;</label>
+                    </div>
+                    <div th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}" class="text-danger"></div>
+                </div>
+
+                <!-- 후기 내용 -->
+                <div class="form-group">
+                    <label for="content">후기 내용</label>
+                    <textarea id="content" th:field="*{content}" class="form-control"
+                        placeholder="강의에 대한 솔직한 후기를 남겨주세요."></textarea>
+                    <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}" class="text-danger"></div>
+                </div>
+
+                <button type="submit" class="btn">작성 완료</button>
+                <a th:href="@{/courses/{id}(id=${course.id})}" class="btn btn-secondary">취소</a>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title th:text="'제출 내역: ' + ${submission.assignmentTitle}"></title>
+    <style>
+        .detail-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            padding: .75rem 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: .25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="detail-container">
+            <h1>제출 내역 확인</h1>
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+            <!-- 내가 제출한 내용 -->
+            <div class="card">
+                <div class="card-header" th:text="${submission.assignmentTitle}">과제 제목</div>
+                <div class="card-body">
+                    <h5>내가 제출한 내용</h5>
+                    <p th:utext="${formattedMyContent}">
+                        내가 제출한 텍스트 내용입니다.
+                    </p>
+                    <p class="text-muted">
+                        <small>제출일: <span
+                                th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}"></span></small>
+                    </p>
+                    <a th:href="@{/assignments/{id}/submit(id=${submission.assignmentId})}" class="btn">수정하기</a>
+                </div>
+            </div>
+
+            <!-- 강사 피드백 -->
+            <div class="card">
+                <div class="card-header">강사 피드백</div>
+                <div class="card-body">
+                    <!-- 피드백이 있을 경우 -->
+                    <div th:if="${submission.feedback}">
+                        <p th:utext="${formattedFeedbackContent}">
+                            강사의 피드백 내용입니다.
+                        </p>
+                        <p class="text-muted">
+                            <small>
+                                <span th:text="${submission.feedback.adminName}">강사 이름</span> |
+                                <span
+                                    th:text="${#temporals.format(submission.feedback.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                            </small>
+                        </p>
+                    </div>
+                    <!-- 피드백이 없을 경우 -->
+                    <div th:unless="${submission.feedback}" class="alert-info">
+                        아직 피드백이 등록되지 않았습니다.
+                    </div>
+                </div>
+            </div>
+
+            <a th:href="@{/my-courses/{id}(id=${submission.courseId})}" class="btn btn-secondary">커리큘럼으로 돌아가기</a>
+        </div>
+    </section>
+</body>
+
+</html>

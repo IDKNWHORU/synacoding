@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title>내 강의실 | 시나코딩</title>
+    <style>
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .course-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+            transition: box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-card:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .course-thumbnail {
+            width: 100%;
+            height: 160px;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
+
+        .course-content {
+            padding: 1rem;
+            flex-grow: 1;
+        }
+
+        .course-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-instructor {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 10px;
+        }
+
+        .progress-bar {
+            background-color: #007bff;
+            height: 100%;
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+            font-size: 0.7rem;
+            line-height: 10px;
+        }
+
+        .progress-text {
+            text-align: right;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="container">
+            <h1>내 강의실</h1>
+
+            <div th:if="${#lists.isEmpty(myCourses)}" class="text-center py-5">
+                <p>수강 중인 강의가 없습니다. 흥미로운 강의를 찾아보세요!</p>
+                <a href="/courses" class="btn btn-primary">강의 보러가기</a>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(myCourses)}" class="course-grid">
+                <div th:each="course : ${myCourses}" class="course-card">
+                    <a th:href="@{/my-courses/{id}(id=${course.courseId})}"
+                        style="text-decoration: none; color: inherit;">
+                        <div class="course-thumbnail">
+                            <span>강의 썸네일</span>
+                        </div>
+                        <div class="course-content">
+                            <h5 class="course-title" th:text="${course.title}">강의 제목</h5>
+                            <p class="course-instructor" th:text="'강사: ' + ${course.instructorName}">강사명</p>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" th:style="'width: ' + ${course.progressRate} + '%;'"></div>
+                            </div>
+                            <div class="progress-text" th:text="${course.progressRate} + '%'">0%</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

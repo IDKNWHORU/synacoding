@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title>알림 센터 | 시나코딩</title>
+    <style>
+        .notification-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .notification-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .notification-item {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-item a {
+            display: block;
+            padding: 1rem;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .notification-item a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification-content {
+            font-size: 1rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin-top: 2rem;
+        }
+
+        .pagination li {
+            margin: 0 5px;
+        }
+
+        .pagination a {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            color: #007bff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .pagination li.active a {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pagination li.disabled a {
+            color: #6c757d;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="notification-container">
+            <h1>알림 센터</h1>
+
+            <div th:if="${notificationPage.isEmpty()}" class="text-center py-5">
+                <p>새로운 알림이 없습니다.</p>
+            </div>
+
+            <ul th:if="${!notificationPage.isEmpty()}" class="notification-list">
+                <li th:each="notification : ${notificationPage.content}" class="notification-item">
+                    <a th:href="@{${notification.linkUrl} ?: '#'}">
+                        <div class="notification-content" th:text="${notification.content}">알림 내용</div>
+                        <div class="notification-time"
+                            th:text="${#temporals.format(notification.createdAt, 'yyyy-MM-dd HH:mm')}">알림 시간</div>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- 페이지네이션 -->
+            <nav th:if="${notificationPage.totalPages > 1}" aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${notificationPage.first} ? 'disabled'">
+                        <a class="page-link"
+                            th:href="@{/notifications(page=${notificationPage.number - 1})}">&laquo;</a>
+                    </li>
+                    <li class="page-item" th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
+                        th:classappend="${pageNumber == nowPage} ? 'active'">
+                        <a class="page-link" th:href="@{/notifications(page=${pageNumber - 1})}"
+                            th:text="${pageNumber}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${notificationPage.last} ? 'disabled'">
+                        <a class="page-link"
+                            th:href="@{/notifications(page=${notificationPage.number + 1})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </section>
+</body>
+
+</html>

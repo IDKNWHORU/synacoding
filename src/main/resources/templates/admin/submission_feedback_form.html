@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin-layout :: layout(~{::content}, ~{::title}, ~{})}">
+
+<head>
+    <title>과제 평가 및 피드백</title>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <h1>과제 평가 및 피드백</h1>
+
+        <!-- 과제 및 학생 정보 -->
+        <div class="card mb-4">
+            <div class="card-header">제출 정보</div>
+            <div class="card-body">
+                <p><strong>강의명:</strong> <span th:text="${submission.courseTitle}"></span></p>
+                <p><strong>과제명:</strong> <span th:text="${submission.assignmentTitle}"></span></p>
+                <p><strong>학생:</strong> <span th:text="${submission.studentName}"></span></p>
+                <p><strong>제출일:</strong> <span
+                        th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+            </div>
+        </div>
+
+        <!-- 학생이 제출한 내용 -->
+        <div class="card mb-4">
+            <div class="card-header">학생 제출 내용</div>
+            <div class="card-body">
+                <p th:text="${submission.myContent}"></p>
+            </div>
+        </div>
+
+        <!-- 피드백 작성 폼 또는 기존 피드백 표시 -->
+        <div class="card">
+            <div class="card-header">피드백</div>
+            <div class="card-body">
+                <!-- 피드백이 아직 없는 경우: 작성 폼 표시 -->
+                <div th:if="${submission.feedback == null}">
+                    <form th:action="@{/admin/submissions/{id}(id=${submission.submissionId})}"
+                        th:object="${feedbackRequest}" method="post">
+                        <div class="mb-3">
+                            <textarea th:field="*{content}" class="form-control" rows="8" placeholder="피드백 내용을 작성해주세요."
+                                required></textarea>
+                            <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"
+                                class="invalid-feedback d-block"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">피드백 제출</button>
+                    </form>
+                </div>
+
+                <!-- 피드백이 이미 있는 경우: 내용 표시 -->
+                <div th:unless="${submission.feedback == null}">
+                    <p th:text="${submission.feedback.content}"></p>
+                    <small class="text-muted"
+                        th:text="${submission.feedback.adminName} + ' | ' + ${#temporals.format(submission.feedback.createdAt, 'yyyy-MM-dd HH:mm')}"></small>
+                </div>
+            </div>
+        </div>
+
+        <a th:href="@{/admin/submissions}" class="btn btn-secondary mt-3">목록으로 돌아가기</a>
+    </section>
+</body>
+
+</html>

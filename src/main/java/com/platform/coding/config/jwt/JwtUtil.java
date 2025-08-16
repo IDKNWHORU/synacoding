@@ -14,7 +14,7 @@ import java.time.Instant;
 public class JwtUtil {
     private final JwtProperties jwtProperties;
 
-    public String createAccessKey(User user) {
+    public String createAccessToken(User user) {
         return JWT.create()
                 .withSubject("AccessToken")
                 .withClaim("id", user.getId())

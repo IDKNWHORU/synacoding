@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title th:text="${lecture.lectureTitle} + ' | 시나코딩'"></title>
+    <style>
+        .video-container {
+            max-width: 900px;
+            margin: 1rem auto;
+        }
+
+        #lecture-video {
+            width: 100%;
+            border-radius: 8px;
+            background-color: #000;
+        }
+
+        .video-header {
+            margin-bottom: 1rem;
+        }
+
+        .video-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .btn-nav {
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .btn-nav.disabled {
+            background-color: #6c757d;
+            pointer-events: none;
+            cursor: default;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="video-container">
+            <div class="video-header">
+                <h1 th:text="${lecture.lectureTitle}">강의 제목</h1>
+                <p>
+                    <a th:href="@{/my-courses/{id}(id=${lecture.courseId})}"
+                        th:text="${lecture.courseTitle} + ' 커리큘럼으로 돌아가기'"></a>
+                </p>
+            </div>
+
+            <video id="lecture-video" controls th:src="${lecture.videoUrl}" th:data-lecture-id="${lecture.lectureId}"
+                th:data-last-viewed="${lecture.lastViewedSeconds}" th:data-next-lecture-id="${lecture.nextLectureId}">
+                브라우저가 비디오 태그를 지원하지 않습니다.
+            </video>
+
+            <!-- [신규] 이전/다음 강의 버튼 및 자동 재생 옵션 -->
+            <div class="video-controls">
+                <!-- 이전 강의 버튼 -->
+                <a th:if="${lecture.previousLectureId != null}"
+                    th:href="@{/lectures/{id}/watch(id=${lecture.previousLectureId})}" class="btn-nav">이전 강의</a>
+                <span th:if="${lecture.previousLectureId == null}" class="btn-nav disabled">이전 강의</span>
+
+                <!-- 자동 재생 체크박스 -->
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="autoplay-checkbox">
+                    <label class="form-check-label" for="autoplay-checkbox">
+                        자동 재생
+                    </label>
+                </div>
+
+                <!-- 다음 강의 버튼 -->
+                <a th:if="${lecture.nextLectureId != null}"
+                    th:href="@{/lectures/{id}/watch(id=${lecture.nextLectureId})}" class="btn-nav">다음 강의</a>
+                <span th:if="${lecture.nextLectureId == null}" class="btn-nav disabled">다음 강의</span>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            const video = document.getElementById('lecture-video');
+            const lectureId = video.dataset.lectureId;
+            const lastViewedSeconds = parseInt(video.dataset.lastViewed, 10) || 0;
+            const nextLectureId = video.dataset.nextLectureId; // 다음 강의 ID 가져오기
+
+            const autoplayCheckbox = document.getElementById('autoplay-checkbox');
+            const AUTOPLAY_STORAGE_KEY = 'lectureAutoplayEnabled';
+
+            // '이어보기' 기능: 동영상이 로드되면 저장된 시간으로 이동
+            video.addEventListener('loadedmetadata', () => {
+                video.currentTime = lastViewedSeconds;
+            });
+
+            // 30초마다 진도율을 서버에 전송하는 함수
+            const sendProgressUpdate = async () => {
+                const currentTime = Math.floor(video.currentTime);
+                console.log(`Sending progress update: ${currentTime}s`);
+
+                try {
+                    await fetch(`/api/lectures/${lectureId}/progress`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currentViewedSeconds: currentTime })
+                    });
+                } catch (error) {
+                    console.error('Failed to send progress update:', error);
+                }
+            };
+
+            // 30초 간격으로 진도율 업데이트 함수 호출
+            const progressInterval = setInterval(sendProgressUpdate, 30000); // 30초
+
+            // 페이지를 떠날 때(새로고침, 닫기 등) 마지막 진도율을 한 번 더 전송
+            window.addEventListener('beforeunload', sendProgressUpdate);
+
+            // --- [신규] 자동 재생 로직 ---
+            // 페이지 로드 시 localStorage에서 자동 재생 설정 불러오기
+            document.addEventListener('DOMContentLoaded', () => {
+                const isAutoplayEnabled = localStorage.getItem(AUTOPLAY_STORAGE_KEY) === 'true';
+                autoplayCheckbox.checked = isAutoplayEnabled;
+            });
+
+            // 체크박스 상태 변경 시 localStorage에 저장
+            autoplayCheckbox.addEventListener('change', () => {
+                localStorage.setItem(AUTOPLAY_STORAGE_KEY, autoplayCheckbox.checked);
+            });
+
+            // 동영상 재생이 끝났을 때의 이벤트 리스너
+            video.addEventListener('ended', () => {
+                console.log('Video has ended.');
+                if (autoplayCheckbox.checked && nextLectureId) {
+                    console.log(`Autoplaying next lecture: ${nextLectureId}`);
+                    window.location.href = `/lectures/${nextLectureId}/watch`;
+                }
+            });
+
+        </script>
+    </section>
+</body>
+
+</html>

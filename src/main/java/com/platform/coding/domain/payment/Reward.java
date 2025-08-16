@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -25,6 +27,7 @@ public class Reward {
     private User user;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "reward_type", nullable = false)
     private RewardType rewardType;
     
@@ -53,6 +56,6 @@ public class Reward {
         if (expiresAt != null && expiresAt.isBefore(Instant.now())) {
             throw new IllegalStateException("만료된 보상입니다.");
         }
-        this.isUsed = false;
+        this.isUsed = true;
     }
 }

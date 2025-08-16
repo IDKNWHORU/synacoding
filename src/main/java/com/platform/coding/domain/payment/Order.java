@@ -7,6 +7,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -34,6 +36,7 @@ public class Order {
     private User parent;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private OrderStatus status;
 
@@ -65,5 +68,13 @@ public class Order {
     // 주문 처리 완료
     public void completeOrder() {
         this.status = OrderStatus.COMPLETED;
+    }
+
+    // 주문 취소(환불) 처리
+    public void cancel() {
+        if (this.status != OrderStatus.COMPLETED) {
+            throw new IllegalStateException("완료된 주문만 취소할 수 있습니다. 현재 상태: " + this.status);
+        }
+        this.status = OrderStatus.CANCELLED;
     }
 }

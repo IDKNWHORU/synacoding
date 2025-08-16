@@ -4,7 +4,9 @@ import com.platform.coding.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,11 +30,13 @@ public class Course {
     
     @Column(nullable = false)
     private String title;
-    
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Setter
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private CourseStatus status = CourseStatus.DRAFT;
 
@@ -69,4 +73,23 @@ public class Course {
         chapter.setCourse(this);
     }
 
+    public void updateDetails(String title, String description, BigDecimal price) {
+        if (title != null) {
+            this.title = title;
+        }
+        if (description != null) {
+            this.description = description;
+        }
+        if(price != null) {
+            this.price = price;
+        }
+    }
+    
+    // 보관(논리적 삭제) 처리
+    public void archive() {
+        if (this.status == CourseStatus.ARCHIVED) {
+            return;
+        }
+        this.status = CourseStatus.ARCHIVED;
+    }
 }

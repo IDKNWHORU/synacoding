@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title th:text="${course.title} + ' | 커리큘럼'"></title>
+    <style>
+        .curriculum-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .chapter-card {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .chapter-header {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .lecture-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .lecture-item {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .lecture-item:last-child {
+            border-bottom: none;
+        }
+
+        .lecture-title-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lecture-title-wrapper a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .lecture-title-wrapper a:hover {
+            color: #007bff;
+        }
+
+        .assignment-list {
+            margin-top: 0.75rem;
+            padding-left: 1.5rem;
+        }
+
+        .badge-submitted {
+            font-size: 0.75em;
+            padding: .25em .5em;
+            background-color: #198754;
+            /* 초록색 */
+            color: white;
+            border-radius: .25rem;
+            margin-left: .5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="curriculum-container">
+            <h1 th:text="${course.title}">강의 제목</h1>
+            <p th:text="${course.description}">강의 설명</p>
+            <a href="/my-courses" class="btn btn-secondary mb-4">내 강의 목록으로</a>
+
+            <div th:each="chapter : ${course.curriculum}" class="chapter-card">
+                <div class="chapter-header" th:text="${chapter.title}">챕터 제목</div>
+                <ul class="lecture-list">
+                    <li th:each="lecture : ${chapter.lectures}" class="lecture-item">
+                        <div class="lecture-title-wrapper">
+                            <a th:href="@{/lectures/{id}/watch(id=${lecture.lectureId})}" th:text="${lecture.title}">렉처
+                                제목</a>
+                            <!-- TODO: 수강 완료 여부 표시 기능 추가 -->
+                        </div>
+                        <!-- 과제 목록 표시 부분 추가 -->
+                        <div th:if="${!#lists.isEmpty(lecture.assignments)}" class="assignment-list">
+                            <h6>- 과제</h6>
+                            <ul class="list-unstyled">
+                                <li th:each="assignment : ${lecture.assignments}">
+                                    <!-- 1. 아직 제출하지 않은 과제 -->
+                                    <a th:if="${assignment.submissionId == null}"
+                                        th:href="@{/assignments/{id}/submit(id=${assignment.assignmentId})}"
+                                        th:text="${assignment.title}">
+                                    </a>
+                                    <!-- 2. 이미 제출한 과제 -->
+                                    <a th:if="${assignment.submissionId != null}"
+                                        th:href="@{/submissions/{id}(id=${assignment.submissionId})}"
+                                        th:text="${assignment.title}">
+                                    </a>
+                                    <!-- 제출 완료 뱃지 표시 -->
+                                    <span th:if="${assignment.submissionId != null}" class="badge-submitted">
+                                        제출 완료
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

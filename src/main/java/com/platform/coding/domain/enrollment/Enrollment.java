@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -30,6 +32,7 @@ public class Enrollment {
     private Course course;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private EnrollmentStatus status;
 
@@ -71,5 +74,15 @@ public class Enrollment {
             this.status = EnrollmentStatus.COMPLETED;
             this.completedAt = Instant.now();
         }
+    }
+
+    /**
+     * 환불을 요청하여 상태를 변경합니다.
+     */
+    public void requestRefund() {
+        if (this.status != EnrollmentStatus.IN_PROGRESS) {
+            throw new IllegalStateException("수강 중인 강의만 환불 요청이 가능합니다. 현재 상태: " + this.status);
+        }
+        this.status = EnrollmentStatus.REFUND_REQUESTED;
     }
 }

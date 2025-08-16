@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/courses")
 @RequiredArgsConstructor
-public class CourseController {
+public class CourseApiController {
     private final CourseService courseService;
 
     // GET /api/courses?page=0?size=10&sort=createdAt,desc

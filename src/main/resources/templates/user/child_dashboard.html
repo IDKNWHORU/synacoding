@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title th:text="${dashboard.childName} + '님의 학습 현황 | 시나코딩'"></title>
+    <style>
+        .container {
+            max-width: 900px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 2rem;
+        }
+
+        .course-progress-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .course-progress-card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: .25rem;
+            height: 1.2rem;
+            margin-bottom: .5rem;
+        }
+
+        .progress-bar {
+            background-color: #0d6efd;
+            height: 100%;
+            border-radius: .25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .assignment-list {
+            list-style-type: none;
+            padding-left: 0;
+            margin-top: 1.5rem;
+        }
+
+        .assignment-list-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .assignment-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            padding: .25em .6em;
+            border-radius: .25rem;
+            color: #fff;
+        }
+
+        .status-completed {
+            background-color: #198754;
+            /* 초록색 */
+        }
+
+        .status-pending {
+            background-color: #dc3545;
+            /* 빨간색 */
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1><span th:text="${dashboard.childName}">자녀 이름</span>님의 학습 현황</h1>
+                <a th:href="@{/my-profile/children}" class="btn-link">&laquo; 자녀 목록으로 돌아가기</a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(dashboard.courses)}" class="text-center p-5">
+                <p>수강 중인 강의가 없습니다.</p>
+            </div>
+
+            <div th:each="course : ${dashboard.courses}" class="course-progress-card">
+                <h3 th:text="${course.courseTitle}">강의 제목</h3>
+
+                <!-- 진도율 프로그레스 바 -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar" th:style="'width: ' + ${course.progressRate} + '%;'"
+                        th:text="${course.progressRate} + '%'"></div>
+                </div>
+
+                <!-- 과제 제출 현황 -->
+                <div th:if="${!#lists.isEmpty(course.assignments)}">
+                    <h4>과제 제출 현황</h4>
+                    <ul class="assignment-list">
+                        <li th:each="assignment : ${course.assignments}" class="assignment-list-item">
+                            <span th:text="${assignment.assignmentTitle}">과제 제목</span>
+                            <span class="status-badge" th:text="${assignment.submissionStatus}"
+                                th:classappend="${assignment.submissionStatus == '제출 완료' ? 'status-completed' : 'status-pending'}">
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+                <p th:if="${#lists.isEmpty(course.assignments)}" class="text-muted">이 강의에는 등록된 과제가 없습니다.</p>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

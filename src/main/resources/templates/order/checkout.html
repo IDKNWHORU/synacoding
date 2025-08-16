@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+<head>
+    <title>결제하기 | 시나코딩</title>
+    <style>
+        .checkout-container { max-width: 700px; margin: 2rem auto; padding: 2rem; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: .5rem; }
+        .form-group select, .form-group input { width: 100%; padding: .5rem; border: 1px solid #ccc; border-radius: 4px; }
+        .course-info { border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
+        .price-display { font-size: 1.5rem; font-weight: bold; text-align: right; }
+        .btn { display: inline-block; background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; text-decoration: none; cursor: pointer; width: 100%; text-align: center; }
+        .btn:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+<section th:fragment="content">
+    <div class="checkout-container">
+        <h2>수강 신청 및 결제</h2>
+        <form id="paymentForm">
+            <!-- 강의 정보 표시 -->
+            <div class="form-group course-info">
+                <h4>강의 정보</h4>
+                <p th:text="${course.title}">강의 제목</p>
+                <div class="price-display" th:text="${#numbers.formatCurrency(course.price)}">가격</div>
+            </div>
+
+            <!-- 자녀 선택 드롭다운 -->
+            <div class="form-group">
+                <label for="studentId">누가 수강할까요?</label>
+                <select id="studentId" name="studentId" required>
+                    <option value="">-- 자녀를 선택해주세요 --</option>
+                    <option th:each="child : ${children}" th:value="${child.userId}" th:text="${child.userName}"></option>
+                </select>
+            </div>
+            
+            <!-- TODO: 포인트 및 쿠폰 적용 UI 추가 -->
+            
+            <button type="submit" class="btn">결제하기</button>
+        </form>
+    </div>
+
+    <script th:inline="javascript">
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const courseId = [[${course.id}]];
+            const studentId = document.getElementById('studentId').value;
+
+            if (!studentId) {
+                alert('수강할 자녀를 선택해주세요.');
+                return;
+            }
+
+            try {
+                // 1. 주문 생성 API 호출
+                const orderResponse = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ courseId: courseId })
+                });
+
+                if (!orderResponse.ok) {
+                    throw new Error('주문을 생성하는데 실패했습니다.');
+                }
+                const orderData = await orderResponse.json();
+                const orderId = orderData.orderId;
+
+                // 2. 결제 API 호출 (PG사 연동 로직은 이 부분에 추가)
+                const paymentResponse = await fetch('/api/payments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        studentId: studentId,
+                        paymentMethod: 'CREDIT_CARD', // 예시
+                        // pointId, couponId 등도 추가 가능
+                    })
+                });
+
+                if (paymentResponse.ok) {
+                    alert('결제가 완료되었습니다. 내 강의실에서 확인하세요.');
+                    window.location.href = '/my-courses'; // 내 강의실 페이지로 이동
+                } else {
+                    const error = await paymentResponse.json();
+                    alert('결제 실패: ' + (error.message || '오류가 발생했습니다.'));
+                }
+            } catch (error) {
+                console.error('Payment process error:', error);
+                alert('결제 과정 중 오류가 발생했습니다.');
+            }
+        });
+    </script>
+</section>
+</body>
+</html>

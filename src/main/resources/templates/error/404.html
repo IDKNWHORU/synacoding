@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title>페이지를 찾을 수 없습니다 | 시나코딩</title>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="container text-center" style="text-align: center; padding: 4rem 0;">
+            <h1>404 - 페이지를 찾을 수 없습니다.</h1>
+            <p>요청하신 페이지가 존재하지 않거나, 현재 접근할 수 없습니다.</p>
+            <a href="/" class="btn btn-primary"
+                style="text-decoration: none; background-color: #007bff; color: white; padding: 10px 20px; border-radius: 5px; margin-top: 1rem; display: inline-block;">메인으로
+                돌아가기</a>
+        </div>
+    </section>
+</body>
+
+</html>

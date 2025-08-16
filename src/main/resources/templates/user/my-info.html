@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title>내 정보 | 시나코딩</title>
+    <style>
+        .container {
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: .5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: .5rem;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: .5rem 1rem;
+            border: none;
+            border-radius: .25rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .alert {
+            padding: .75rem 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: .25rem;
+        }
+
+        .alert-success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+
+        .alert-danger {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="container">
+            <h1>내 정보</h1>
+
+            <!-- 기본 정보 표시 카드 -->
+            <div class="card">
+                <div class="card-header">기본 정보</div>
+                <div class="card-body">
+                    <p><strong>이름:</strong> <span th:text="${user.userName}">사용자 이름</span></p>
+                    <p><strong>이메일:</strong> <span th:text="${user.email}">user@example.com</span></p>
+                </div>
+            </div>
+
+            <!-- 비밀번호 변경 카드 -->
+            <div class="card">
+                <div class="card-header">비밀번호 변경</div>
+                <div class="card-body">
+                    <div id="alert-placeholder"></div>
+                    <form id="passwordChangeForm">
+                        <div class="form-group">
+                            <label for="currentPassword">현재 비밀번호</label>
+                            <input type="password" id="currentPassword" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">새 비밀번호 (8자 이상)</label>
+                            <input type="password" id="newPassword" class="form-control" required minlength="8">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmNewPassword">새 비밀번호 확인</label>
+                            <input type="password" id="confirmNewPassword" class="form-control" required minlength="8">
+                        </div>
+                        <button type="submit" class="btn">비밀번호 변경</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('passwordChangeForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+                const alertPlaceholder = document.getElementById('alert-placeholder');
+
+                alertPlaceholder.innerHTML = ''; // 이전 알림 메시지 제거
+
+                if (newPassword !== confirmNewPassword) {
+                    showAlert('새 비밀번호가 일치하지 않습니다.', 'danger');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/my-info/change-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword })
+                    });
+
+                    if (response.ok) {
+                        showAlert('비밀번호가 성공적으로 변경되었습니다.', 'success');
+                        document.getElementById('passwordChangeForm').reset(); // 폼 초기화
+                    } else {
+                        const error = await response.json();
+                        showAlert('오류: ' + (error.message || '비밀번호 변경에 실패했습니다.'), 'danger');
+                    }
+                } catch (error) {
+                    console.error('Password change error:', error);
+                    showAlert('요청 중 오류가 발생했습니다. 다시 시도해주세요.', 'danger');
+                }
+            });
+
+            function showAlert(message, type) {
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = [
+                    `<div class="alert alert-${type}" role="alert">`,
+                    `   <div>${message}</div>`,
+                    '</div>'
+                ].join('');
+
+                document.getElementById('alert-placeholder').append(wrapper);
+            }
+        </script>
+    </section>
+</body>
+
+</html>

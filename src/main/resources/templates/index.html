@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <!-- 이 페이지의 고유한 제목을 설정합니다 -->
+    <meta charset="UTF-8">
+    <title>환영합니다! | 시나코딩</title>
+</head>
+
+<body>
+    <!-- 이 페이지의 실제 콘텐츠 내용입니다 -->
+    <section th:fragment="content">
+        <div class="container">
+            <h1>시나리오 기반 코딩 학습 플랫폼에 오신 것을 환영합니다!</h1>
+            <p>프로젝트 중심의 커리큘럼을 통해 실용적인 코딩 능력을 키워보세요.</p>
+            <a href="/courses" class="btn btn-primary">모든 강의 보러가기</a>
+        </div>
+    </section>
+</body>
+
+</html>

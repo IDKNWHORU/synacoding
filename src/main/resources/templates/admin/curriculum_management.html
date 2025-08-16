@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layouts/admin-layout :: layout(~{::content}, ~{::title}, ~{::scripts})}">
+
+<head>
+    <title>커리큘럼 관리</title>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <h1 th:text="'커리큘럼 관리: ' + ${curriculum.courseTitle}"></h1>
+        <a th:href="@{/admin/courses}" class="btn btn-secondary mb-4">강의 목록으로 돌아가기</a>
+
+        <!-- 성공/에러 메시지 표시 -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <!-- 챕터 및 렉처 목록 -->
+        <div id="curriculum">
+            <div th:each="chapter, chapStat : ${curriculum.chapters}" class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span th:text="${chapter.order} + '. ' + ${chapter.title}">챕터 제목</span>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                            th:attr="onclick=|toggleEditForm('chapter-edit-form-' + ${chapter.chapterId})|">수정</button>
+                        <form th:action="@{/admin/courses/chapters/{id}/delete(id=${chapter.chapterId})}" method="post"
+                            style="display:inline;"
+                            onsubmit="return confirm('이 챕터를 삭제하면 포함된 모든 렉처와 과제도 함께 삭제됩니다. 정말 삭제하시겠습니까?');">
+                            <input type="hidden" name="courseId" th:value="${curriculum.courseId}" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Hidden Edit Form -->
+                <div class="card-body" style="display:none; background-color: #f8f9fa;"
+                    th:id="'chapter-edit-form-' + ${chapter.chapterId}">
+                    <h5>챕터 정보 수정</h5>
+                    <form th:action="@{/admin/courses/chapters/{id}/edit(id=${chapter.chapterId})}" method="post">
+                        <input type="hidden" name="courseId" th:value="${curriculum.courseId}" />
+                        <div class="row align-items-end">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label form-label-sm">제목</label>
+                                <input type="text" name="title" class="form-control form-control-sm"
+                                    th:value="${chapter.title}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label form-label-sm">순서</label>
+                                <input type="number" name="order" class="form-control form-control-sm"
+                                    th:value="${chapter.order}" min="1" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button type="submit" class="btn btn-sm btn-primary w-100">저장</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <ul class="list-group list-group-flush">
+                    <li th:each="lecture, lectStat : ${chapter.lectures}" class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span th:text="${lecture.order} + '. ' + ${lecture.title}">렉처 제목</span>
+                                <span th:if="${lecture.isSample}" class="badge bg-success ms-2">맛보기</span>
+                            </div>
+                            <div>
+                                <a th:href="@{/admin/courses/lectures/{id}/edit(id=${lecture.lectureId})}"
+                                    class="btn btn-sm btn-outline-secondary">수정</a>
+                                <form th:action="@{/admin/courses/lectures/{id}/delete(id=${lecture.lectureId})}"
+                                    method="post" style="display:inline;"
+                                    onsubmit="return confirm('정말로 이 렉처를 삭제하시겠습니까?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- 과제 섹션 -->
+                        <div class="mt-3 ps-4">
+                            <h6>과제 목록</h6>
+                            <ul class="list-unstyled">
+                                <li th:each="assignment : ${lecture.assignments}"
+                                    class="d-flex justify-content-between align-items-center mb-1">
+                                    <span th:text="${assignment.title}">과제 제목</span>
+                                    <!-- 과제 수정/삭제 버튼 추가 -->
+                                    <div>
+                                        <a th:href="@{/admin/courses/assignments/{id}/edit(id=${assignment.assignmentId})}"
+                                            class="btn btn-sm btn-outline-secondary">수정</a>
+                                        <form
+                                            th:action="@{/admin/courses/assignments/{id}/delete(id=${assignment.assignmentId})}"
+                                            method="post" style="display:inline;"
+                                            onsubmit="return confirm('정말로 이 과제를 삭제하시겠습니까?');">
+                                            <input type="hidden" name="courseId" th:value="${curriculum.courseId}" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                                        </form>
+                                    </div>
+                                </li>
+                                <li th:if="${#lists.isEmpty(lecture.assignments)}">
+                                    <small class="text-muted">등록된 과제가 없습니다.</small>
+                                </li>
+                            </ul>
+                            <a th:href="@{/admin/courses/lectures/{id}/assignments/new(id=${lecture.lectureId})}"
+                                class="btn btn-sm btn-primary mt-2">과제 추가</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 신규 챕터 추가 폼 -->
+        <div class="card">
+            <div class="card-header">신규 챕터 추가</div>
+            <div class="card-body">
+                <form th:action="@{/admin/courses/{id}/chapters(id=${curriculum.courseId})}"
+                    th:object="${chapterRequest}" method="post">
+                    <div class="mb-3">
+                        <label for="chapterTitle" class="form-label">챕터 제목</label>
+                        <input type="text" id="chapterTitle" th:field="*{title}" class="form-control"
+                            th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''">
+                        <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="chapterOrder" class="form-label">순서</label>
+                        <input type="number" id="chapterOrder" th:field="*{order}" class="form-control"
+                            th:classappend="${#fields.hasErrors('order')} ? 'is-invalid' : ''">
+                        <div th:if="${#fields.hasErrors('order')}" th:errors="*{order}" class="invalid-feedback"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">챕터 추가</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!--/* 페이지 고유 스크립트 블록 */-->
+    <th:block th:fragment="scripts">
+        <script>
+            function toggleEditForm(formId) {
+                const form = document.getElementById(formId);
+                if (form) {
+                    if (form.style.display === 'none' || form.style.display === '') {
+                        form.style.display = 'block';
+                    } else {
+                        form.style.display = 'none';
+                    }
+                }
+            }
+        </script>
+    </th:block>
+
+</body>
+
+</html>

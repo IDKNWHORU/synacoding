@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/layout :: layout(~{::content}, ~{::title})}">
+
+<head>
+    <title>자녀 학습관리 | 시나코딩</title>
+    <style>
+        .container {
+            max-width: 960px;
+        }
+
+        /* 자녀별 학습 현황 카드 레이아웃 */
+        .children-dashboard-grid {
+            display: grid;
+            /* 화면 크기에 따라 자동으로 카드 개수 조절 */
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .child-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .child-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .child-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 1rem;
+        }
+
+        .child-card-header h4 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #333;
+        }
+
+        .course-progress-list {
+            list-style-type: none;
+            padding: 0;
+            flex-grow: 1;
+            /* 카드 내에서 남은 공간을 모두 차지하도록 */
+        }
+
+        .course-progress-list h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        .course-progress-item {
+            margin-bottom: 1rem;
+        }
+
+        .course-progress-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 프로그레스 바 스타일 */
+        .progress-bar-container {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 8px;
+            margin-top: 0.25rem;
+        }
+
+        .progress-bar {
+            background-color: #007bff;
+            height: 100%;
+            border-radius: 5px;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* 새 자녀 등록 폼 컨테이너 */
+        .form-container {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: .5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: .75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: .75rem;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-sm {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            width: auto;
+            background-color: #6c757d;
+        }
+
+        /* 유틸리티 */
+        .d-flex {
+            display: flex;
+        }
+
+        .justify-content-between {
+            justify-content: space-between;
+        }
+
+        .align-items-center {
+            align-items: center;
+        }
+
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+
+        .mt-5 {
+            margin-top: 3rem;
+        }
+
+        .text-muted {
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="container">
+            <!-- 페이지 헤더 -->
+            <h1>자녀 학습관리 대시보드</h1>
+            <p class="text-muted">자녀들의 학습 현황을 한눈에 확인하고, 새 자녀 계정을 등록할 수 있습니다.</p>
+
+            <!-- 자녀별 학습 현황 대시보드 -->
+            <div class="children-dashboard-grid" th:if="${!#lists.isEmpty(learningSummaries)}">
+                <!-- 새로운 DTO(learningSummaries)를 순회하며 자녀 카드 생성 -->
+                <div th:each="summary : ${learningSummaries}" class="child-card">
+                    <div class="child-card-header">
+                        <h4 th:text="${summary.childName}">자녀 이름</h4>
+                        <a th:href="@{/my-profile/children/{childId}/dashboard(childId=${summary.childId})}"
+                            class="btn btn-sm">상세 현황 보기</a>
+                    </div>
+
+                    <div class="course-progress-list">
+                        <h5>수강중인 강의</h5>
+                        <!-- 수강 중인 강의가 없을 때 메시지 표시 -->
+                        <div th:if="${#lists.isEmpty(summary.courses)}">
+                            <p class="text-muted">수강 중인 강의가 없습니다.</p>
+                        </div>
+                        <!-- 수강 중인 강의 목록 순회 -->
+                        <div th:each="course : ${summary.courses}" class="course-progress-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span th:text="${course.courseTitle}">강의 제목</span>
+                                <span class="progress-text" th:text="${course.progressRate} + '%'">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" th:style="'width: ' + ${course.progressRate} + '%;'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 등록된 자녀가 없을 때 메시지 표시 -->
+            <p th:if="${#lists.isEmpty(learningSummaries)}">아직 등록된 자녀 계정이 없습니다. 아래 폼에서 새 계정을 추가해주세요.</p>
+
+            <!-- 새 자녀 등록 폼 -->
+            <div class="form-container mt-5">
+                <h3>새 자녀 계정 등록</h3>
+                <form id="childAccountForm" novalidate>
+                    <div class="form-group">
+                        <label for="userName">자녀 닉네임</label>
+                        <input type="text" id="userName" class="form-control" th:field="${childRequest.userName}"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">자녀 이메일</label>
+                        <input type="email" id="email" class="form-control" th:field="${childRequest.email}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">비밀번호 (8자 이상)</label>
+                        <input type="password" id="password" class="form-control" th:field="${childRequest.password}"
+                            required minlength="8">
+                    </div>
+                    <button type="submit" class="btn">자녀 계정 생성</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- JavaScript 로직 -->
+        <script>
+            document.getElementById('childAccountForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const userName = document.getElementById('userName').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                // 간단한 클라이언트 유효성 검사
+                if (!userName || !email || !password) {
+                    alert('모든 필드를 입력해주세요.');
+                    return;
+                }
+                if (password.length < 8) {
+                    alert('비밀번호는 8자 이상이어야 합니다.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/parents/me/children', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userName, email, password })
+                    });
+
+                    if (response.status === 201) { // 201 Created
+                        alert('자녀 계정이 성공적으로 생성되었습니다.');
+                        window.location.reload(); // 페이지를 새로고침하여 목록을 갱신
+                    } else {
+                        const error = await response.json();
+                        alert('계정 생성 실패: ' + (error.message || '입력 정보를 확인해주세요.'));
+                    }
+                } catch (error) {
+                    console.error('Child account creation error:', error);
+                    alert('계정 생성 중 오류가 발생했습니다.');
+                }
+            });
+        </script>
+    </section>
+</body>
+
+</html>

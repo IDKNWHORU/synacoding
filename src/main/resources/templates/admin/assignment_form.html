@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin-layout :: layout(~{::content}, ~{::title}, ~{})}">
+
+<head>
+    <title>신규 과제 등록</title>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <h1>신규 과제 등록</h1>
+        <h5 class="text-muted" th:text="'강의: ' + ${lecture.title}"></h5>
+
+        <form th:action="@{/admin/courses/lectures/{lectureId}/assignments(lectureId=${lecture.id})}"
+            th:object="${assignmentRequest}" method="post">
+            <div class="mb-3">
+                <label for="title" class="form-label">과제 제목</label>
+                <input type="text" id="title" th:field="*{title}" class="form-control"
+                    th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''">
+                <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">과제 내용</label>
+                <textarea id="content" th:field="*{content}" class="form-control" rows="8"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="deadline" class="form-label">마감일 (선택)</label>
+                <input type="datetime-local" id="deadline" name="deadline"
+                    th:value="${assignmentRequest.deadline != null ? #temporals.format(assignmentRequest.deadline, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                    class="form-control" th:classappend="${#fields.hasErrors('deadline')} ? 'is-invalid' : ''">
+                <div th:if="${#fields.hasErrors('deadline')}" th:errors="*{deadline}" class="invalid-feedback"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">과제 등록</button>
+            <a th:href="@{/admin/courses/{courseId}/curriculum(courseId=${lecture.chapter.course.id})}"
+                class="btn btn-secondary">취소</a>
+        </form>
+    </section>
+</body>
+
+</html>

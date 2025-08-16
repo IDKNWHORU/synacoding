@@ -50,4 +50,9 @@ public class Chapter {
     protected void setCourse(Course course) {
         this.course = course;
     }
+
+    public void updateDetails(String title, int order) {
+        this.title = title;
+        this.order = order;
+    }
 }

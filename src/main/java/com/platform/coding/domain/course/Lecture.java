@@ -53,4 +53,12 @@ public class Lecture {
     protected void setChapter(Chapter chapter) {
         this.chapter = chapter;
     }
+
+    public void updateDetails(String title, int order, String videoUrl, boolean isSample, Integer durationSeconds) {
+        this.title = title;
+        this.order = order;
+        this.videoUrl = videoUrl;
+        this.isSample = isSample;
+        this.durationSeconds = durationSeconds;
+    }
 }
